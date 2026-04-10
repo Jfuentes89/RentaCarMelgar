@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Transportes Melgar — Rent a Car</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --azul:#0C447C;--azul-m:#185FA5;--azul-l:#378ADD;--azul-xl:#E6F1FB;
+  --verde:#2D7A3A;--verde-l:#E8F5EA;--rojo:#C0392B;--rojo-l:#FDECEA;
+  --amarillo:#B7770D;--amarillo-l:#FEF3CD;--gris:#6B7280;--gris-l:#F3F4F6;
+  --borde:#E5E7EB;--bg:#F8FAFC;--blanco:#FFFFFF;--texto:#111827;
+  --radio:10px;--sombra:0 1px 3px rgba(0,0,0,.08);--sombra-m:0 4px 12px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--texto);font-size:14px;line-height:1.5}
+button{cursor:pointer;font-family:inherit;font-size:14px}input,select,textarea{font-family:inherit;font-size:14px}
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:220px;background:var(--azul);display:flex;flex-direction:column;flex-shrink:0}
+#content{flex:1;overflow-y:auto;padding:28px}
+.sidebar-brand{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.brand-icon{width:36px;height:36px;background:var(--azul-l);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.brand-name{color:#fff;font-size:13px;font-weight:600}.brand-sub{color:rgba(255,255,255,.45);font-size:11px}
+.sidebar-nav{flex:1;padding:8px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:all .15s;cursor:pointer;user-select:none}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.07)}.nav-item.active{color:#fff;background:rgba(255,255,255,.12);border-left-color:#93C5FD}
+.nav-icon{font-size:15px;width:18px;text-align:center}
+.nav-badge{background:var(--rojo);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:auto}
+.sidebar-user{padding:14px 16px;border-top:1px solid rgba(255,255,255,.1)}
+.user-info{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--azul-l);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.user-name{color:rgba(255,255,255,.8);font-size:12px;font-weight:500}.user-rol{color:rgba(255,255,255,.4);font-size:11px}
+.btn-logout{color:rgba(255,255,255,.45);font-size:12px;background:none;border:none;padding:0;text-align:left;width:100%}.btn-logout:hover{color:#fff}
+.card{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--radio);padding:20px;box-shadow:var(--sombra)}
+.card-tight{padding:0;overflow:hidden}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:500;border:none;transition:all .15s;line-height:1}
+.btn-primary{background:var(--azul-m);color:#fff}.btn-primary:hover{background:var(--azul)}
+.btn-secondary{background:var(--blanco);color:var(--texto);border:1px solid var(--borde)}.btn-secondary:hover{background:var(--gris-l)}
+.btn-danger{background:var(--rojo);color:#fff}
+.btn-green{background:var(--verde);color:#fff}.btn-green:hover{background:#236130}
+.btn-wa{background:#25D366;color:#fff;border:none}.btn-wa:hover{background:#1EB858}
+.btn-pdf{background:#7B2FBE;color:#fff;border:none}.btn-pdf:hover{background:#6A1FA8}
+.btn-sm{padding:5px 12px;font-size:13px}
+.input{width:100%;padding:8px 12px;border:1px solid var(--borde);border-radius:8px;outline:none;background:var(--blanco);transition:border .15s}
+.input:focus{border-color:var(--azul-l);box-shadow:0 0 0 3px rgba(55,138,221,.12)}.input.error{border-color:var(--rojo)}
+.label{display:block;font-size:12px;font-weight:500;color:var(--gris);margin-bottom:5px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-group{display:flex;flex-direction:column;gap:4px}
+.field-error{font-size:11px;color:var(--rojo);margin-top:3px}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:var(--verde-l);color:var(--verde)}.badge-blue{background:var(--azul-xl);color:var(--azul-m)}
+.badge-red{background:var(--rojo-l);color:var(--rojo)}.badge-yellow{background:var(--amarillo-l);color:var(--amarillo)}
+.badge-gray{background:var(--gris-l);color:var(--gris)}
+.badge-purple{background:#F3E8FF;color:#7B2FBE}
+table{width:100%;border-collapse:collapse}thead tr{background:var(--gris-l)}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--borde)}
+td{padding:11px 16px;border-bottom:1px solid var(--gris-l);font-size:13px;vertical-align:middle}
+tbody tr:hover{background:#FAFBFC}tbody tr:last-child td{border-bottom:none}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;animation:fadeIn .15s}
+.modal{background:var(--blanco);border-radius:14px;padding:24px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:var(--sombra-m);animation:slideUp .2s}
+.modal-lg{max-width:720px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:15px;font-weight:600}
+.modal-close{background:none;border:none;font-size:20px;color:var(--gris);line-height:1;padding:2px 6px;border-radius:6px}.modal-close:hover{background:var(--gris-l)}
+.modal-footer{display:flex;gap:10px;margin-top:20px}.modal-footer .btn{flex:1;justify-content:center;padding:10px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title{font-size:18px;font-weight:700}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.metric{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--radio);padding:16px 20px;box-shadow:var(--sombra)}
+.metric-label{font-size:11px;color:var(--gris);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.metric-value{font-size:26px;font-weight:700;line-height:1}.metric-sub{font-size:11px;color:var(--gris);margin-top:4px}
+.alert-banner{display:flex;align-items:center;gap:10px;background:var(--rojo-l);border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--rojo)}
+.alert-banner.yellow{background:var(--amarillo-l);border-color:#FDE68A;color:var(--amarillo)}
+.info-box{background:var(--azul-xl);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.info-box.green{background:var(--verde-l)}.info-box.red{background:var(--rojo-l)}.info-box.yellow{background:var(--amarillo-l)}
+.intel-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:500;background:var(--rojo-l);color:var(--rojo);margin-top:3px}
+.intel-tag.good{background:var(--verde-l);color:var(--verde)}.intel-tag.warn{background:var(--amarillo-l);color:var(--amarillo)}
+.empty{text-align:center;padding:40px;color:var(--gris);font-size:13px}
+.action-link{background:none;border:none;color:var(--azul-m);font-size:12px;padding:0;text-decoration:underline}.action-link:hover{color:var(--azul)}
+.action-link.red{color:var(--rojo)}.action-link.green{color:var(--verde)}.action-link.purple{color:#7B2FBE}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+.divider{height:1px;background:var(--borde);margin:16px 0}
+.tabs{display:flex;gap:2px;background:var(--gris-l);border-radius:8px;padding:3px;margin-bottom:16px}
+.tab{flex:1;text-align:center;padding:6px;border-radius:6px;font-size:13px;font-weight:500;color:var(--gris);cursor:pointer;border:none;background:none;transition:all .15s}
+.tab.active{background:var(--blanco);color:var(--texto);box-shadow:var(--sombra)}
+.flota-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.vehiculo-card{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--radio);padding:16px;cursor:pointer;transition:box-shadow .15s}.vehiculo-card:hover{box-shadow:var(--sombra-m)}
+.vehiculo-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.vehiculo-icon{width:38px;height:38px;background:var(--azul-xl);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.filtros{display:flex;gap:10px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
+.abono-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gris-l);font-size:13px}
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-mes{font-size:12px;color:var(--gris);width:50px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:var(--gris-l);border-radius:4px;height:22px;overflow:hidden}
+.bar-fill{height:100%;background:var(--azul-m);border-radius:4px;display:flex;align-items:center;padding:0 8px;min-width:2px}
+.bar-amount{font-size:11px;font-weight:600;color:#fff;white-space:nowrap}
+.flota-vis{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:10px}
+.flota-celd{height:32px;border-radius:6px}
+.section-title{font-size:12px;font-weight:700;color:var(--azul-m);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--azul-xl)}
+@media print{#sidebar,#modal,.btn,.filtros,.action-link,button,.no-print{display:none!important}#content{padding:0}.card{box-shadow:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}
+.page{animation:fadeIn .2s}
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-2{gap:8px}.gap-3{gap:12px}.mt-2{margin-top:8px}.mb-4{margin-bottom:16px}
+.text-sm{font-size:13px}.text-xs{font-size:11px}.font-bold{font-weight:700}.font-medium{font-weight:500}
+.text-gray{color:var(--gris)}.text-red{color:var(--rojo)}.text-green{color:var(--verde)}.text-blue{color:var(--azul-m)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div style="width:100%;max-width:360px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="width:56px;height:56px;background:var(--azul);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px">🚗</div>
+      <div style="font-size:18px;font-weight:700">Transportes Melgar</div>
+      <div style="color:var(--gris);font-size:13px;margin-top:4px">Sistema de Gestión</div>
+    </div>
+    <div class="card">
+      <form id="login-form" style="display:flex;flex-direction:column;gap:14px">
+        <div class="form-group"><label class="label">Correo electrónico</label><input class="input" type="email" id="login-email" placeholder="admin@melgar.com" required/></div>
+        <div class="form-group"><label class="label">Contraseña</label><input class="input" type="password" id="login-password" placeholder="••••••••" required/></div>
+        <div id="login-error" style="display:none;background:var(--rojo-l);color:var(--rojo);padding:10px 14px;border-radius:8px;font-size:13px"></div>
+        <button type="submit" class="btn btn-primary" id="login-btn" style="justify-content:center;padding:11px">Ingresar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon">🚗</div><div class="brand-name">Transportes Melgar</div><div class="brand-sub">Rent a Car</div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-page="dashboard"><span class="nav-icon">▦</span> Dashboard</div>
+      <div class="nav-item" data-page="flota"><span class="nav-icon">🚗</span> Flota</div>
+      <div class="nav-item" data-page="reservas"><span class="nav-icon">📅</span> Reservas</div>
+      <div class="nav-item" data-page="clientes"><span class="nav-icon">👤</span> Clientes</div>
+      <div class="nav-item" data-page="pagos"><span class="nav-icon">💳</span> Pagos <span class="nav-badge" id="badge-mora" style="display:none">0</span></div>
+      <div class="nav-item" data-page="reportes"><span class="nav-icon">📊</span> Reportes</div>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-info"><div class="user-avatar" id="user-avatar">A</div><div><div class="user-name" id="user-name">—</div><div class="user-rol" id="user-rol">—</div></div></div>
+      <button class="btn-logout" id="btn-logout">Cerrar sesión →</button>
+    </div>
+  </div>
+  <div id="content" style="flex:1;overflow-y:auto;padding:28px"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" style="display:none" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal" id="modal-box">
+    <div class="modal-header"><div class="modal-title" id="modal-title">—</div><button class="modal-close" onclick="cerrarModal()">×</button></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'
+import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'
+import{getFirestore,collection,doc,addDoc,getDoc,getDocs,updateDoc,query,orderBy,where,serverTimestamp,Timestamp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
+
+const FB={apiKey:"AIzaSyCvD-CostvKcda6qqk-rsdgBbp0wkpwXMo",authDomain:"renta-car-melgar.firebaseapp.com",projectId:"renta-car-melgar",storageBucket:"renta-car-melgar.firebasestorage.app",messagingSenderId:"165489828857",appId:"1:165489828857:web:346450b2bce19898d35328"}
+const fbApp=initializeApp(FB),auth=getAuth(fbApp),db=getFirestore(fbApp)
+const col=n=>collection(db,n),snap2arr=s=>s.docs.map(d=>({id:d.id,...d.data()}))
+const toDate=v=>{if(!v)return null;if(v?.toDate)return v.toDate();return new Date(v)}
+const $=id=>document.getElementById(id)
+const fmtCur=n=>new Intl.NumberFormat('es-SV',{style:'currency',currency:'USD'}).format(n||0)
+const fmtDate=d=>d?new Date(d).toLocaleDateString('es-SV',{day:'2-digit',month:'2-digit',year:'numeric'}):'—'
+const fmtDateLong=d=>d?new Date(d).toLocaleDateString('es-SV',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'—'
+const hoyISO=()=>new Date().toISOString().split('T')[0]
+const hoy=()=>{const d=new Date();d.setHours(0,0,0,0);return d}
+
+const EV={DISPONIBLE:{label:'Disponible',cls:'badge-green'},ALQUILADO:{label:'Alquilado',cls:'badge-blue'},MANTENIMIENTO:{label:'Mantenimiento',cls:'badge-yellow'}}
+const ER={ACTIVA:{label:'Activa',cls:'badge-green'},FINALIZADA:{label:'Finalizada',cls:'badge-gray'},CANCELADA:{label:'Cancelada',cls:'badge-red'}}
+const EP={PENDIENTE:{label:'Pendiente',cls:'badge-yellow'},PAGADO:{label:'Pagado',cls:'badge-green'},VENCIDO:{label:'Vencido',cls:'badge-red'}}
+const TV={SEDAN:'Sedán',SUV:'SUV',PICKUP:'Pick-up',VAN:'Van'}
+const MP={EFECTIVO:'Efectivo',TRANSFERENCIA:'Transferencia',TARJETA:'Tarjeta'}
+
+let usuario=null
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth,async fbUser=>{
+  if(fbUser){
+    const snap=await getDoc(doc(db,'usuarios',fbUser.uid)),d=snap.exists()?snap.data():{}
+    usuario={uid:fbUser.uid,email:fbUser.email,nombre:d.nombre||fbUser.email,rol:d.rol||'EMPLEADO'}
+    $('login-screen').style.display='none';$('app').style.display='flex'
+    $('user-name').textContent=usuario.nombre;$('user-rol').textContent=usuario.rol
+    $('user-avatar').textContent=usuario.nombre.charAt(0).toUpperCase()
+    marcarMora();navegarA('dashboard')
+  }else{$('login-screen').style.display='flex';$('app').style.display='none'}
+})
+$('login-form').addEventListener('submit',async e=>{
+  e.preventDefault();const btn=$('login-btn'),err=$('login-error')
+  btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;err.style.display='none'
+  try{await signInWithEmailAndPassword(auth,$('login-email').value,$('login-password').value)}
+  catch(ex){const m={'auth/invalid-credential':'Correo o contraseña incorrectos','auth/too-many-requests':'Demasiados intentos'}
+    err.textContent=m[ex.code]||'Error';err.style.display='block';btn.innerHTML='Ingresar';btn.disabled=false}
+})
+$('btn-logout').addEventListener('click',()=>signOut(auth))
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-item').forEach(el=>el.addEventListener('click',()=>navegarA(el.dataset.page)))
+function navegarA(p){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===p))
+  $('content').innerHTML='<div class="empty">Cargando...</div>'
+  const pages={dashboard:renderDashboard,flota:renderFlota,reservas:renderReservas,clientes:renderClientes,pagos:renderPagos,reportes:renderReportes}
+  if(pages[p])pages[p]()
+}
+window.cerrarModal=()=>{$('modal').style.display='none';$('modal-box').classList.remove('modal-lg')}
+function abrirModal(titulo,html,grande=false){
+  $('modal-title').textContent=titulo;$('modal-body').innerHTML=html
+  if(grande)$('modal-box').classList.add('modal-lg');$('modal').style.display='flex'
+}
+
+// ─── MORA AUTOMÁTICA ──────────────────────────────────────────────────────────
+async function marcarMora(){
+  const hoyD=hoy(),pSnap=await getDocs(query(col('pagos'),where('estado','==','PENDIENTE')))
+  const rSnap=await getDocs(col('reservas')),rMap=Object.fromEntries(rSnap.docs.map(d=>[d.id,d.data()]))
+  for(const p of pSnap.docs){const r=rMap[p.data().reservaId];if(r&&toDate(r.fechaRetorno)<hoyD)await updateDoc(p.ref,{estado:'VENCIDO'})}
+  const vSnap=await getDocs(query(col('pagos'),where('estado','==','VENCIDO')))
+  const badge=$('badge-mora')
+  if(vSnap.size>0){badge.textContent=vSnap.size;badge.style.display='inline'}else badge.style.display='none'
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PDF CONTRATO — genera el contrato oficial de Transportes Melgar
+// ═══════════════════════════════════════════════════════════════════════════════
+window.generarContratoPDF = function(r, cli, veh) {
+  const { jsPDF } = window.jspdf
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'letter' })
+
+  // Colores corporativos
+  const AZUL  = [12, 68, 124]
+  const PURP  = [100, 0, 150]
+  const NEGRO = [30, 30, 30]
+  const GRIS  = [120, 120, 120]
+
+  const W = 215.9, M = 18
+  const CW = W - M * 2
+
+  // ─── FUNCIÓN AUXILIAR ──────────────────────────────────────────
+  function header(d){
+    // Banda superior azul/morada
+    doc.setFillColor(...AZUL)
+    doc.rect(0, 0, 8, 280, 'F')
+    doc.setFillColor(...PURP)
+    doc.rect(0, 265, W, 20, 'F')
+
+    // Logo TM (simulado con texto)
+    doc.setFillColor(...AZUL)
+    doc.roundedRect(M, 8, 20, 20, 3, 3, 'F')
+    doc.setTextColor(255,255,255)
+    doc.setFontSize(14)
+    doc.setFont('helvetica','bold')
+    doc.text('TM', M+10, 21, {align:'center'})
+
+    // Datos empresa
+    doc.setTextColor(...NEGRO)
+    doc.setFontSize(11)
+    doc.setFont('helvetica','bold')
+    doc.text('Transportes Melgar', M+26, 14)
+    doc.setFontSize(8)
+    doc.setFont('helvetica','normal')
+    doc.setTextColor(...GRIS)
+    doc.text('Calle Carrangasunga Bo. San Jose, Distrito El Divisadero, Morazan.', M+26, 19)
+    doc.text('Telefono: 7943-3317 / 7611-8812', M+26, 24)
+
+    // Fecha
+    doc.setTextColor(...GRIS)
+    doc.setFontSize(9)
+    doc.text(fmtDateLong(d).replace(/^\w/,c=>c.toUpperCase()), W-M, 14, {align:'right'})
+
+    // Línea separadora
+    doc.setDrawColor(...AZUL)
+    doc.setLineWidth(0.5)
+    doc.line(M, 32, W-M, 32)
+
+    // Web footer
+    doc.setTextColor(255,255,255)
+    doc.setFontSize(9)
+    doc.setFont('helvetica','bold')
+    doc.text('Transportesmelgar.com', W/2, 273, {align:'center'})
+  }
+
+  // ─── PÁGINA 1: CONTRATO ───────────────────────────────────────────
+  header(new Date())
+
+  // Título
+  doc.setTextColor(...NEGRO)
+  doc.setFontSize(13)
+  doc.setFont('helvetica','bold')
+  doc.text('CONTRATO DE ARRENDAMIENTO DE VEHICULO', W/2, 42, {align:'center'})
+
+  // Texto introductorio
+  const propietario = veh.nombrePropietario || 'NEHEMIAS NAHUM ROMERO GUEVARA'
+  const duiProp     = veh.duiPropietario    || '04206419-7'
+  const tipoDoc     = cli.tipoDocumento === 'PASAPORTE' ? 'pasaporte número' : 'número de DUI'
+  const numDoc      = cli.numeroDocumento || '—'
+
+  const intro = `Yo, ${propietario} con número de DUI ${duiProp}, motorista del domicilio de San Francisco Gotera, Morazan. Hago constar que el señor(a) ${(cli.nombreCompleto||'').toUpperCase()} mayor de edad con ${tipoDoc} ${numDoc} del domicilio de ${cli.direccion||'—'}. Está tomando en alquiler el vehículo de las siguientes características y bajo las siguientes condiciones:`
+
+  doc.setFontSize(10)
+  doc.setFont('helvetica','normal')
+  doc.setTextColor(...NEGRO)
+  const lines = doc.splitTextToSize(intro, CW)
+  doc.text(lines, M, 52)
+
+  // Tabla de datos del vehículo
+  let y = 52 + lines.length * 5 + 4
+  const campos = [
+    ['MARCA',          veh.marca||'—'],
+    ['MODELO',         veh.modelo||'—'],
+    ['AÑO',            String(veh.anio||'—')],
+    ['COLOR',          veh.color||'—'],
+    ['CLASE',          'AUTOMOVIL'],
+    ['TIPO',           TV[veh.tipo]||veh.tipo||'—'],
+    ['No. MOTOR',      veh.numeroMotor||'—'],
+    ['No. CHASIS',     veh.numeroChasis||'—'],
+    ['No. VIN',        veh.numeroVin||'—'],
+    ['PROPIETARIO',    propietario],
+    ['DOMINIO / EN CALIDAD', veh.dominio||'PROPIEDAD'],
+    ['PLACAS',         veh.placa||'—'],
+  ]
+  const colA = M, colB = M + 68, rowH = 7
+  campos.forEach(([k,v],i)=>{
+    const ry = y + i * rowH
+    doc.setFillColor(i%2===0?245:255, i%2===0?247:255, i%2===0?250:255)
+    doc.rect(colA, ry-4.5, CW, rowH, 'F')
+    doc.setDrawColor(220,220,220)
+    doc.rect(colA, ry-4.5, CW, rowH, 'S')
+    doc.setFont('helvetica','bold')
+    doc.setFontSize(9)
+    doc.setTextColor(...NEGRO)
+    doc.text(k+':', colA+3, ry)
+    doc.setFont('helvetica','normal')
+    doc.text(v, colB, ry)
+  })
+
+  // Tabla de fechas
+  y += campos.length * rowH + 6
+  const fs = toDate(r.fechaSalida), fr = toDate(r.fechaRetorno)
+  const dias = fs && fr ? Math.ceil((fr-fs)/86400000) : 0
+
+  doc.setFillColor(...AZUL)
+  doc.rect(M, y, CW, 8, 'F')
+  doc.setTextColor(255,255,255)
+  doc.setFontSize(9)
+  doc.setFont('helvetica','bold')
+  const colsF = [M+3, M+50, M+100, M+150]
+  doc.text('FECHA DE ENTREGA', colsF[0], y+5.5)
+  doc.text('FECHA DE RECIBIDO', colsF[1], y+5.5)
+  doc.text('TOTAL DE DIAS', colsF[2], y+5.5)
+  doc.text('TOTAL A PAGAR', colsF[3], y+5.5)
+
+  y += 8
+  doc.setFillColor(240,246,255)
+  doc.rect(M, y, CW, 9, 'F')
+  doc.setDrawColor(200,215,235)
+  doc.rect(M, y, CW, 9, 'S')
+  doc.setTextColor(...NEGRO)
+  doc.setFontSize(10)
+  doc.setFont('helvetica','bold')
+  doc.text(fs ? fmtDate(fs) : '—', colsF[0], y+6)
+  doc.text(fr ? fmtDate(fr) : '—', colsF[1], y+6)
+  doc.text(String(dias), colsF[2], y+6)
+  doc.text(fmtCur(r.total), colsF[3], y+6)
+  y += 14
+
+  // Cláusula de seguro
+  const clausula = `Ademas, hacemos constar que el vehiculo antes mencionado cuenta con seguro de alquiler de la compania LA CENTRAL DE SEGUROS Y FIANZAS, numero telefonico de emergencias 2268-6088 el cual posee un deducible de $800.00 dolares de los Estados Unidos, monto total que se debera ser pagado por el cliente en caso de siniestro que supere dicho valor o pago parcial del monto en caso de un siniestro que no supere dicho valor deducible, a excepcion de los casos de negligencia del conductor, como cruzar un rio, quebrada o carretera en condiciones peligrosas cuando la corriente de agua supere el nivel de la via; conducir bajo los efectos del alcohol, drogas o manejar el vehiculo sin licencia de conducir o licencia vencida. En tales casos, el cliente sera responsable del total del siniestro.`
+
+  doc.setFont('helvetica','normal')
+  doc.setFontSize(9)
+  doc.setTextColor(...NEGRO)
+  const clausLines = doc.splitTextToSize(clausula, CW)
+  doc.text(clausLines, M, y)
+  y += clausLines.length * 4.5 + 8
+
+  doc.setFontSize(9)
+  doc.text('Sin más que agregar y en aceptación de dicho contrato, firmamos a continuación.', M, y)
+  y += 18
+
+  // Firmas
+  doc.setDrawColor(...NEGRO)
+  doc.setLineWidth(0.3)
+  doc.line(M, y, M+70, y)
+  doc.line(W-M-70, y, W-M, y)
+  doc.setFontSize(9)
+  doc.setFont('helvetica','bold')
+  doc.text(propietario, M, y+5)
+  doc.text(cli.nombreCompleto||'—', W-M-70, y+5)
+  doc.setFont('helvetica','normal')
+  doc.text('Propietario', M, y+10)
+  doc.text('Cliente', W-M-70, y+10)
+
+  // ─── PÁGINA 2: CONTROL DE ACCESORIOS ─────────────────────────────
+  doc.addPage()
+  header(new Date())
+
+  doc.setTextColor(...NEGRO)
+  doc.setFontSize(13)
+  doc.setFont('helvetica','bold')
+  doc.text('CONTROL DE ACCESORIOS', W/2, 42, {align:'center'})
+
+  y = 52
+  const infoRows = [
+    ['CLIENTE',         (cli.nombreCompleto||'—').toUpperCase()],
+    ['VEHICULO',        `${(veh.marca||'')} ${(veh.modelo||'')} ${veh.anio||''} ${(veh.color||'').toUpperCase()} ${veh.placa||''}`],
+    ['PERIODO DE RENTA',`DEL ${fmtDate(toDate(r.fechaSalida))} HASTA ${fmtDate(toDate(r.fechaRetorno))}`],
+  ]
+  infoRows.forEach(([k,v])=>{
+    doc.setFont('helvetica','normal')
+    doc.setFontSize(9)
+    doc.setTextColor(...GRIS)
+    doc.text(k+':', M, y)
+    doc.setFont('helvetica','bold')
+    doc.setTextColor(...NEGRO)
+    doc.text(v, M+40, y)
+    y += 6
+  })
+  y += 4
+
+  // Tabla de accesorios (col izquierda)
+  const accesorios = [
+    'Llanta de Repuesto','Mica','Palanca de Mica','Llave de Ruedas','Triángulos','Extintor',
+    'Tapón de Gasolina','Antena','Espejos Exteriores','Copas de Ruedas','Emblemas',
+    'Limpia Parabrisas','Loderas','Cubre Llanta de Repuesto','Espejo Interior','Encendedor',
+    'Sobre Alfombras','Radio / CD Player / Control','Llavero','Tarjeta de Circulación','Odómetro Actual'
+  ]
+
+  const tY = y
+  const tW = 90, tCols = [M, M+tW-20, M+tW-8]
+
+  // Encabezado tabla
+  doc.setFillColor(...AZUL)
+  doc.rect(M, y, tW, 8, 'F')
+  doc.setTextColor(255,255,255)
+  doc.setFontSize(9)
+  doc.setFont('helvetica','bold')
+  doc.text('LISTADO DE ACCESORIOS', M+3, y+5.5)
+  doc.text('SI', tCols[1]+2, y+5.5)
+  doc.text('NO', tCols[2]+2, y+5.5)
+  y += 8
+
+  accesorios.forEach((a,i)=>{
+    const ry = y + i*7
+    doc.setFillColor(i%2===0?248:255, i%2===0?249:255, i%2===0?252:255)
+    doc.rect(M, ry-4.5, tW, 7, 'F')
+    doc.setDrawColor(220,220,220)
+    doc.rect(M, ry-4.5, tW, 7, 'S')
+    doc.rect(tCols[1], ry-4.5, 14, 7, 'S')
+    doc.rect(tCols[2], ry-4.5, tW-(tCols[2]-M), 7, 'S')
+    doc.setFont('helvetica','normal')
+    doc.setFontSize(8)
+    doc.setTextColor(...NEGRO)
+    doc.text(a, M+3, ry)
+  })
+
+  // Columna derecha: Medidor de gasolina + Observaciones
+  const rX = M + tW + 6
+  const rW = CW - tW - 6
+
+  // Medidor de gasolina (dibujado)
+  doc.setDrawColor(...NEGRO)
+  doc.setLineWidth(0.5)
+  doc.arc = undefined // no existe en jsPDF nativo, lo simulamos
+  // Semicírculo medidor (aproximado con líneas)
+  const cx = rX + rW/2, cy = tY + 22, radius = 18
+  doc.setFillColor(240,240,240)
+  // Colores del medidor
+  const sectors = [[255,60,60],[255,165,0],[255,220,0],[100,200,100],[50,180,50]]
+  for(let i=0;i<5;i++){
+    const angle = Math.PI + (i/5)*Math.PI
+    const angle2 = Math.PI + ((i+1)/5)*Math.PI
+    const pts = [[cx,cy]]
+    for(let a=angle;a<=angle2;a+=0.1){pts.push([cx+radius*Math.cos(a),cy+radius*Math.sin(a)])}
+    pts.push([cx,cy])
+    doc.setFillColor(...sectors[i])
+    doc.polygon ? doc.polygon(pts,'F') : null
+  }
+  // Círculo interior blanco
+  doc.setFillColor(255,255,255)
+  doc.circle(cx, cy, radius*0.6, 'F')
+  // Aguja (apuntando al centro = medio)
+  doc.setDrawColor(0,0,0)
+  doc.setLineWidth(0.8)
+  doc.line(cx, cy, cx-radius*0.7*Math.cos(Math.PI*1.5), cy-radius*0.7*Math.sin(Math.PI*1.5))
+  // Icono combustible
+  doc.setFontSize(10)
+  doc.text('E', rX+4, tY+30)
+  doc.text('F', rX+rW-8, tY+30)
+  doc.setFontSize(7)
+  doc.setTextColor(...GRIS)
+  doc.text('Nivel de combustible', cx, tY+38, {align:'center'})
+
+  // Observaciones
+  const obY = tY + 44
+  doc.setDrawColor(200,200,200)
+  doc.setLineWidth(0.3)
+  doc.rect(rX, obY, rW, 70, 'S')
+  doc.setTextColor(...NEGRO)
+  doc.setFontSize(9)
+  doc.setFont('helvetica','bold')
+  doc.text('OBSERVACIONES:', rX+3, obY+7)
+  for(let i=1;i<9;i++) doc.line(rX+3, obY+7+i*7, rX+rW-3, obY+7+i*7)
+
+  // Firma cliente pág 2
+  const firmY = tY + accesorios.length*7 + 20
+  doc.setDrawColor(...NEGRO)
+  doc.setLineWidth(0.3)
+  doc.line(W/2-40, firmY, W/2+40, firmY)
+  doc.setFont('helvetica','bold')
+  doc.setFontSize(9)
+  doc.setTextColor(...NEGRO)
+  doc.text(cli.nombreCompleto||'—', W/2, firmY+5, {align:'center'})
+  doc.setFont('helvetica','normal')
+  doc.text('Cliente', W/2, firmY+10, {align:'center'})
+
+  // Texto al pie pág 2
+  doc.setFontSize(8.5)
+  doc.setFont('helvetica','normal')
+  doc.setTextColor(...NEGRO)
+  const pie = 'Estoy consciente que todos los accesorios antes marcados en el recuadro SI están incluidos al momento de la entrega del vehículo arrendado antes mencionado, por lo cual me hago responsable por la pérdida o daños de tales accesorios.'
+  const pieLines = doc.splitTextToSize(pie, CW)
+  doc.text(pieLines, M, firmY+18)
+
+  // Guardar
+  const nombre = `Contrato_${(cli.nombreCompleto||'cliente').replace(/\s+/g,'_')}_${fmtDate(toDate(r.fechaSalida)).replace(/\//g,'-')}.pdf`
+  doc.save(nombre)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════════
+async function renderDashboard(){
+  const[vSnap,rSnap,pSnap,cSnap]=await Promise.all([getDocs(col('vehiculos')),getDocs(query(col('reservas'),orderBy('createdAt','desc'))),getDocs(col('pagos')),getDocs(col('clientes'))])
+  const vehiculos=snap2arr(vSnap),reservas=snap2arr(rSnap),pagos=snap2arr(pSnap)
+  const cMap=Object.fromEntries(cSnap.docs.map(d=>[d.id,d.data()])),vMap=Object.fromEntries(vSnap.docs.map(d=>[d.id,d.data()]))
+  const flota={total:vehiculos.length,disponibles:vehiculos.filter(v=>v.estado==='DISPONIBLE').length,alquilados:vehiculos.filter(v=>v.estado==='ALQUILADO').length,mant:vehiculos.filter(v=>v.estado==='MANTENIMIENTO').length}
+  const ahora=new Date(),inicioMes=new Date(ahora.getFullYear(),ahora.getMonth(),1)
+  const totalCobrado=pagos.filter(p=>p.estado==='PAGADO').reduce((s,p)=>s+Number(p.monto),0)
+  const totalPendiente=pagos.filter(p=>p.estado==='PENDIENTE').reduce((s,p)=>s+Number(p.monto),0)
+  const totalVencido=pagos.filter(p=>p.estado==='VENCIDO').reduce((s,p)=>s+Number(p.monto),0)
+  const ingresosMes=pagos.filter(p=>p.estado==='PAGADO'&&toDate(p.fechaPago)>=inicioMes).reduce((s,p)=>s+Number(p.monto),0)
+  const hoyD=hoy()
+  const resActivas=reservas.filter(r=>r.estado==='ACTIVA').map(r=>({...r,fechaRetorno:toDate(r.fechaRetorno),cliente:cMap[r.clienteId]||null,vehiculo:vMap[r.vehiculoId]||null}))
+  const vencenHoy=resActivas.filter(r=>r.fechaRetorno?.toDateString()===hoyD.toDateString())
+  const vencenManana=resActivas.filter(r=>{if(!r.fechaRetorno)return false;const d=new Date(hoyD);d.setDate(d.getDate()+1);return r.fechaRetorno.toDateString()===d.toDateString()})
+  $('content').innerHTML=`<div class="page">
+    <div class="page-header"><div class="page-title">Dashboard</div><div class="text-sm text-gray">${ahora.toLocaleDateString('es-SV',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div>
+    ${vencenHoy.length?`<div class="alert-banner">🚨 <strong>${vencenHoy.length} contrato(s) vencen HOY:</strong> ${vencenHoy.map(r=>r.cliente?.nombreCompleto||'—').join(', ')}</div>`:''}
+    ${vencenManana.length?`<div class="alert-banner yellow">⚠️ <strong>${vencenManana.length} vencen mañana:</strong> ${vencenManana.map(r=>r.cliente?.nombreCompleto||'—').join(', ')}</div>`:''}
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Disponibles</div><div class="metric-value" style="color:var(--verde)">${flota.disponibles}</div><div class="metric-sub">de ${flota.total} en flota</div></div>
+      <div class="metric"><div class="metric-label">Alquilados</div><div class="metric-value" style="color:var(--azul-m)">${flota.alquilados}</div></div>
+      <div class="metric"><div class="metric-label">Mantenimiento</div><div class="metric-value" style="color:var(--amarillo)">${flota.mant}</div></div>
+      <div class="metric"><div class="metric-label">Ingresos del mes</div><div class="metric-value" style="font-size:19px">${fmtCur(ingresosMes)}</div></div>
+    </div>
+    <div class="card mb-4">
+      <div class="font-medium mb-3">💰 Resumen financiero</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div class="info-box green" style="flex-direction:column;align-items:flex-start;padding:14px 18px"><div class="text-xs" style="color:var(--verde);font-weight:600">💰 TOTAL COBRADO</div><div style="font-size:22px;font-weight:700;color:var(--verde)">${fmtCur(totalCobrado)}</div></div>
+        <div class="info-box yellow" style="flex-direction:column;align-items:flex-start;padding:14px 18px"><div class="text-xs" style="color:var(--amarillo);font-weight:600">⚠️ PENDIENTE</div><div style="font-size:22px;font-weight:700;color:var(--amarillo)">${fmtCur(totalPendiente)}</div></div>
+        <div class="info-box red" style="flex-direction:column;align-items:flex-start;padding:14px 18px"><div class="text-xs" style="color:var(--rojo);font-weight:600">🔴 EN MORA</div><div style="font-size:22px;font-weight:700;color:var(--rojo)">${fmtCur(totalVencido)}</div></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="flex justify-between items-center mb-3"><div class="font-medium">Contratos activos</div><span class="badge badge-blue">${resActivas.length}</span></div>
+        ${resActivas.length===0?'<div class="text-sm text-gray">Sin contratos activos</div>':resActivas.slice(0,5).map(r=>{const dias=r.fechaRetorno?Math.ceil((r.fechaRetorno-new Date())/86400000):null;const urg=dias!==null&&dias<=1?'color:var(--rojo)':dias<=3?'color:var(--amarillo)':'';return`<div class="flex justify-between items-center" style="padding:7px 0;border-bottom:1px solid var(--gris-l)"><div><div class="font-medium text-sm">${r.cliente?.nombreCompleto||'—'}</div><div class="text-xs text-gray">${r.vehiculo?.marca||''} ${r.vehiculo?.modelo||''}</div>${dias!==null?`<div class="text-xs" style="${urg}">${dias<=0?'⚠️ Venció hoy':dias===1?'⚠️ Vence mañana':`Vence en ${dias} días`}</div>`:''}</div><div class="text-sm font-medium">${fmtCur(r.total)}</div></div>`}).join('')}
+      </div>
+      <div class="card"><div class="font-medium mb-3">Disponibilidad</div>
+        <div class="flex gap-3 mb-3">${[['var(--verde)','Disp.',flota.disponibles],['var(--azul-m)','Alq.',flota.alquilados],['var(--amarillo)','Mant.',flota.mant]].map(([c,l,n])=>`<div class="flex items-center gap-2 text-xs text-gray"><div style="width:10px;height:10px;border-radius:3px;background:${c}"></div>${l}(${n})</div>`).join('')}</div>
+        ${flota.total>0?`<div class="flota-vis">${Array.from({length:flota.total},(_,i)=>{const c=i<flota.disponibles?'var(--verde)':i<flota.disponibles+flota.alquilados?'var(--azul-m)':'var(--amarillo)';return`<div class="flota-celd" style="background:${c}"></div>`}).join('')}</div>`:'<div class="text-sm text-gray">Sin vehículos</div>'}
+      </div>
+    </div>
+  </div>`
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FLOTA — formulario expandido con campos del propietario y datos técnicos
+// ═══════════════════════════════════════════════════════════════════════════════
+async function renderFlota(fe='',search=''){
+  const snap=await getDocs(query(col('vehiculos'),orderBy('createdAt','desc')))
+  let v=snap2arr(snap)
+  if(fe)v=v.filter(x=>x.estado===fe)
+  if(search){const s=search.toLowerCase();v=v.filter(x=>x.placa?.toLowerCase().includes(s)||x.marca?.toLowerCase().includes(s)||x.modelo?.toLowerCase().includes(s))}
+  $('content').innerHTML=`<div class="page">
+    <div class="page-header"><div class="page-title">Flota de vehículos</div><button class="btn btn-primary" onclick="abrirModalVehiculo(null)">+ Agregar vehículo</button></div>
+    <div class="filtros">
+      <form class="flex gap-2" style="flex:1" onsubmit="event.preventDefault();renderFlota($('fe').value,$('fs').value)"><input class="input" id="fs" placeholder="Buscar placa, marca..." value="${search}"/><button type="submit" class="btn btn-secondary">Buscar</button></form>
+      <select class="input" id="fe" style="width:180px" onchange="renderFlota(this.value,$('fs').value)"><option value="">Todos</option><option value="DISPONIBLE" ${fe==='DISPONIBLE'?'selected':''}>Disponible</option><option value="ALQUILADO" ${fe==='ALQUILADO'?'selected':''}>Alquilado</option><option value="MANTENIMIENTO" ${fe==='MANTENIMIENTO'?'selected':''}>Mantenimiento</option></select>
+    </div>
+    <div class="flota-grid">${v.length===0?'<div class="empty" style="grid-column:1/-1">No se encontraron vehículos</div>':v.map(x=>{const est=EV[x.estado]||{label:x.estado,cls:'badge-gray'};return`<div class="vehiculo-card" onclick='abrirModalVehiculo(${JSON.stringify(x).replace(/'/g,"&#39;")})'><div class="vehiculo-top"><div class="vehiculo-icon">🚗</div><span class="badge ${est.cls}">${est.label}</span></div><div style="font-weight:700;font-size:14px">${x.placa}</div><div style="font-size:13px;color:var(--gris)">${x.marca} ${x.modelo} ${x.anio}</div><div style="font-size:12px;color:var(--gris);margin-top:4px">${TV[x.tipo]||x.tipo} · ${(x.kilometraje||0).toLocaleString()} km</div><div style="font-size:14px;font-weight:600;color:var(--azul-m);margin-top:8px">$${Number(x.precioDia||0).toFixed(2)}/día</div>${x.estado==='MANTENIMIENTO'&&x.motivoMant?`<div class="text-xs text-gray mt-2">🔧 ${x.motivoMant}</div>`:''}</div>`}).join('')}</div>
+  </div>`
+}
+
+window.abrirModalVehiculo=function(v){
+  const isNew=!v?.id
+  abrirModal(isNew?'Agregar vehículo':'Editar vehículo',`
+    <form id="form-veh" onsubmit="guardarVehiculo(event,${v?`'${v.id}'`:'null'})">
+
+      <div class="section-title">Datos del Propietario</div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label class="label">Nombre del Propietario *</label><input class="input" name="nombrePropietario" value="${v?.nombrePropietario||''}" required placeholder="Nombre completo del propietario"/></div>
+        <div class="form-group"><label class="label">DUI del Propietario *</label><input class="input" name="duiPropietario" value="${v?.duiPropietario||''}" required placeholder="00000000-0"/></div>
+      </div>
+
+      <div class="section-title">Datos del Vehículo</div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label class="label">Marca *</label><input class="input" name="marca" value="${v?.marca||''}" required/></div>
+        <div class="form-group"><label class="label">Modelo *</label><input class="input" name="modelo" value="${v?.modelo||''}" required/></div>
+        <div class="form-group"><label class="label">Año *</label><input class="input" name="anio" type="number" value="${v?.anio||new Date().getFullYear()}" required/></div>
+        <div class="form-group"><label class="label">Color *</label><input class="input" name="color" value="${v?.color||''}" required/></div>
+        <div class="form-group"><label class="label">Tipo *</label>
+          <select class="input" name="tipo">${Object.entries(TV).map(([k,l])=>`<option value="${k}" ${v?.tipo===k?'selected':''}>${l}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label class="label">Placa *</label><input class="input" name="placa" value="${v?.placa||''}" required placeholder="P-000-ABC"/></div>
+      </div>
+
+      <div class="section-title">Datos Técnicos</div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label class="label">No. de Motor *</label><input class="input" name="numeroMotor" value="${v?.numeroMotor||''}" required/></div>
+        <div class="form-group"><label class="label">No. de Chasis *</label><input class="input" name="numeroChasis" value="${v?.numeroChasis||''}" required/></div>
+        <div class="form-group"><label class="label">No. de VIN *</label><input class="input" name="numeroVin" value="${v?.numeroVin||''}" required/></div>
+        <div class="form-group"><label class="label">Dominio / En calidad *</label><input class="input" name="dominio" value="${v?.dominio||'PROPIEDAD'}" required/></div>
+        <div class="form-group"><label class="label">Kilometraje</label><input class="input" name="kilometraje" type="number" value="${v?.kilometraje||0}"/></div>
+        <div class="form-group"><label class="label">Precio por día ($) *</label><input class="input" name="precioDia" type="number" step="0.01" value="${v?.precioDia||''}" required/></div>
+      </div>
+
+      ${!isNew?`
+      <div class="section-title">Estado</div>
+      <div class="form-group" style="margin-bottom:12px"><label class="label">Estado del vehículo</label>
+        <select class="input" name="estado" onchange="toggleMant(this.value)">
+          <option value="DISPONIBLE" ${v?.estado==='DISPONIBLE'?'selected':''}>Disponible</option>
+          <option value="MANTENIMIENTO" ${v?.estado==='MANTENIMIENTO'?'selected':''}>En mantenimiento</option>
+        </select>
+      </div>
+      <div id="mant-fields" style="display:${v?.estado==='MANTENIMIENTO'?'block':'none'}">
+        <div class="form-row" style="margin-bottom:12px">
+          <div class="form-group"><label class="label">Motivo del mantenimiento</label><input class="input" name="motivoMant" value="${v?.motivoMant||''}"/></div>
+          <div class="form-group"><label class="label">Fecha estimada de salida</label><input class="input" name="fechaMant" type="date" value="${v?.fechaMant||''}"/></div>
+        </div>
+      </div>`:''}
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-veh">Guardar vehículo</button>
+      </div>
+    </form>`,true)
+}
+window.toggleMant=v=>{const el=$('mant-fields');if(el)el.style.display=v==='MANTENIMIENTO'?'block':'none'}
+window.guardarVehiculo=async function(e,id){
+  e.preventDefault();const btn=$('btn-veh');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'
+  const fd=new FormData(e.target),data=Object.fromEntries(fd)
+  data.anio=Number(data.anio);data.kilometraje=Number(data.kilometraje);data.precioDia=Number(data.precioDia)
+  if(!data.motivoMant)delete data.motivoMant;if(!data.fechaMant)delete data.fechaMant
+  try{if(!id){data.estado='DISPONIBLE';data.createdAt=serverTimestamp();await addDoc(col('vehiculos'),data)}else await updateDoc(doc(db,'vehiculos',id),data);cerrarModal();renderFlota()}
+  catch(err){alert(err.message);btn.disabled=false;btn.innerHTML='Guardar vehículo'}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RESERVAS
+// ═══════════════════════════════════════════════════════════════════════════════
+async function renderReservas(fe=''){
+  const[rSnap,cSnap,vSnap,pSnap]=await Promise.all([getDocs(query(col('reservas'),orderBy('createdAt','desc'))),getDocs(col('clientes')),getDocs(col('vehiculos')),getDocs(col('pagos'))])
+  let reservas=snap2arr(rSnap);if(fe)reservas=reservas.filter(r=>r.estado===fe)
+  const cMap=Object.fromEntries(cSnap.docs.map(d=>[d.id,d.data()]))
+  const vMap=Object.fromEntries(vSnap.docs.map(d=>[d.id,d.data()]))
+  const pMap={};snap2arr(pSnap).forEach(p=>{if(!pMap[p.reservaId])pMap[p.reservaId]=[];pMap[p.reservaId].push(p)})
+  $('content').innerHTML=`<div class="page">
+    <div class="page-header"><div class="page-title">Reservas</div><button class="btn btn-primary" onclick="abrirModalNuevaReserva()">+ Nueva reserva</button></div>
+    <div class="filtros"><select class="input" style="width:180px" onchange="renderReservas(this.value)"><option value="">Todos</option><option value="ACTIVA" ${fe==='ACTIVA'?'selected':''}>Activas</option><option value="FINALIZADA" ${fe==='FINALIZADA'?'selected':''}>Finalizadas</option><option value="CANCELADA" ${fe==='CANCELADA'?'selected':''}>Canceladas</option></select></div>
+    <div class="card card-tight"><table><thead><tr><th>#</th><th>Cliente</th><th>Vehículo</th><th>Salida</th><th>Retorno</th><th>Total</th><th>Pago</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${reservas.length===0?`<tr><td colspan="9" class="empty">No hay reservas</td></tr>`:reservas.map(r=>{
+        const est=ER[r.estado]||{label:r.estado,cls:'badge-gray'},cli=cMap[r.clienteId]||{},veh=vMap[r.vehiculoId]||{}
+        const ps=pMap[r.id]||[]
+        const pend=ps.filter(p=>p.estado==='PENDIENTE').reduce((s,p)=>s+Number(p.monto),0)
+        const venc=ps.filter(p=>p.estado==='VENCIDO').reduce((s,p)=>s+Number(p.monto),0)
+        const pRes=pend>0?`<span class="badge badge-yellow">${fmtCur(pend)} pend.</span>`:venc>0?`<span class="badge badge-red">${fmtCur(venc)} venc.</span>`:`<span class="badge badge-green">Pagado</span>`
+        const fsISO=r.fechaSalida?.toDate?.()?.toISOString().split('T')[0]||''
+        const frISO=r.fechaRetorno?.toDate?.()?.toISOString().split('T')[0]||''
+        return`<tr>
+          <td class="text-gray" style="font-family:'DM Mono',monospace;font-size:11px">${r.id.slice(0,6)}</td>
+          <td><div class="font-medium">${cli.nombreCompleto||'—'}</div><div class="text-xs text-gray">${cli.numeroDocumento||''}</div></td>
+          <td><div>${veh.marca||''} ${veh.modelo||''}</div><div class="text-xs text-gray">${veh.placa||''}</div></td>
+          <td>${fmtDate(toDate(r.fechaSalida))}</td><td>${fmtDate(toDate(r.fechaRetorno))}</td>
+          <td class="font-medium">${fmtCur(r.total)}</td><td>${pRes}</td>
+          <td><span class="badge ${est.cls}">${est.label}</span></td>
+          <td><div class="flex gap-2" style="flex-wrap:wrap">
+            <button class="action-link purple" onclick='descargarContrato("${r.id}","${r.clienteId}","${r.vehiculoId}")'>📄 Contrato</button>
+            <button class="action-link" onclick='verReserva(${JSON.stringify(r).replace(/'/g,"&#39;")},${JSON.stringify(cli).replace(/'/g,"&#39;")},${JSON.stringify(veh).replace(/'/g,"&#39;")})'>Ver</button>
+            ${r.estado==='ACTIVA'?`
+            <button class="action-link" onclick="editarReserva('${r.id}','${r.vehiculoId}','${fsISO}','${frISO}','${r.observaciones||''}')">Editar</button>
+            <button class="action-link green" onclick="cambiarEstadoReserva('${r.id}','FINALIZADA','${r.vehiculoId}')">Finalizar</button>
+            <button class="action-link red" onclick="cambiarEstadoReserva('${r.id}','CANCELADA','${r.vehiculoId}')">Cancelar</button>`:''}
+          </div></td>
+        </tr>`
+      }).join('')}
+    </tbody></table></div>
+  </div>`
+}
+
+// Descargar contrato PDF
+window.descargarContrato=async function(reservaId,clienteId,vehiculoId){
+  const[rSnap,cSnap,vSnap]=await Promise.all([getDoc(doc(db,'reservas',reservaId)),getDoc(doc(db,'clientes',clienteId)),getDoc(doc(db,'vehiculos',vehiculoId))])
+  if(!rSnap.exists()||!cSnap.exists()||!vSnap.exists()){alert('No se encontraron los datos');return}
+  const r={id:rSnap.id,...rSnap.data()},cli={id:cSnap.id,...cSnap.data()},veh={id:vSnap.id,...vSnap.data()}
+  window.generarContratoPDF(r,cli,veh)
+}
+
+window.cambiarEstadoReserva=async function(id,estado,vehiculoId){
+  if(!confirm(`¿Cambiar estado a ${estado}?`))return
+  await updateDoc(doc(db,'reservas',id),{estado})
+  if(estado==='FINALIZADA'||estado==='CANCELADA')await updateDoc(doc(db,'vehiculos',vehiculoId),{estado:'DISPONIBLE'})
+  if(estado==='CANCELADA'){const ps=await getDocs(query(col('pagos'),where('reservaId','==',id)));for(const p of ps.docs)if(p.data().estado==='PENDIENTE')await updateDoc(p.ref,{estado:'VENCIDO'})}
+  renderReservas()
+}
+
+window.verReserva=function(r,cli,veh){
+  const fs=fmtDate(toDate(r.fechaSalida)),fr=fmtDate(toDate(r.fechaRetorno)),tel=cli.telefono?.replace(/\D/g,'')
+  const msgR=encodeURIComponent(`Hola ${cli.nombreCompleto}, le recordamos que su contrato del ${veh.marca} ${veh.modelo} (${veh.placa}) vence el ${fr}. Por favor coordine la devolución. Gracias, Transportes Melgar.`)
+  const msgP=encodeURIComponent(`Hola ${cli.nombreCompleto}, tiene un pago pendiente de ${fmtCur(r.total)} por la renta del ${veh.marca} ${veh.modelo}. Por favor realice su pago. Gracias, Transportes Melgar.`)
+  abrirModal('Detalle de reserva',`
+    <div class="grid-2" style="gap:8px;margin-bottom:12px">
+      <div><div class="label">Cliente</div><div class="font-medium">${cli.nombreCompleto}</div></div>
+      <div><div class="label">${cli.tipoDocumento||'DUI'}</div><div>${cli.numeroDocumento||'—'}</div></div>
+      <div><div class="label">Teléfono</div><div>${cli.telefono||'—'}</div></div>
+      <div><div class="label">Licencia</div><div>${cli.numeroLicencia||cli.licencia||'—'}</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="grid-2" style="gap:8px;margin-bottom:12px">
+      <div><div class="label">Vehículo</div><div class="font-medium">${veh.marca} ${veh.modelo} ${veh.anio}</div></div>
+      <div><div class="label">Placa</div><div>${veh.placa||'—'}</div></div>
+      <div><div class="label">Salida</div><div class="font-medium">${fs}</div></div>
+      <div><div class="label">Retorno</div><div class="font-medium">${fr}</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="info-box" style="margin-bottom:12px"><div class="text-sm" style="color:var(--azul-m)">Total del contrato</div><div style="font-size:22px;font-weight:700;color:var(--azul)">${fmtCur(r.total)}</div></div>
+    ${r.observaciones?`<div class="text-sm text-gray" style="margin-bottom:8px">Obs: ${r.observaciones}</div>`:''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+      <button class="btn btn-pdf btn-sm" onclick='descargarContrato("${r.id}","${r.clienteId}","${r.vehiculoId}")'>📄 Descargar Contrato PDF</button>
+      ${tel?`<a href="https://wa.me/503${tel}?text=${msgR}" target="_blank" class="btn btn-wa btn-sm">📲 WA Devolución</a><a href="https://wa.me/503${tel}?text=${msgP}" target="_blank" class="btn btn-wa btn-sm">💬 WA Cobro</a>`:''}
+    </div>`,true)
+}
+
+window.editarReserva=function(id,vehiculoId,fsISO,frISO,obs){
+  abrirModal('Editar fechas de reserva',`
+    <form onsubmit="guardarEdicionReserva(event,'${id}','${vehiculoId}')">
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label class="label">Fecha de salida</label><input class="input" id="er-s" name="fechaSalida" type="date" value="${fsISO}" required min="${hoyISO()}"/></div>
+        <div class="form-group"><label class="label">Fecha de retorno</label><input class="input" id="er-r" name="fechaRetorno" type="date" value="${frISO}" required min="${hoyISO()}"/></div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label class="label">Observaciones</label><textarea class="input" name="observaciones" rows="2">${obs||''}</textarea></div>
+      <div id="rec-prev" style="display:none;margin-bottom:12px" class="info-box"><div class="text-sm" style="color:var(--azul-m)">Nuevo total</div><div id="rec-val" style="font-size:18px;font-weight:700;color:var(--azul)"></div></div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button><button type="submit" class="btn btn-primary" id="btn-er">Guardar</button></div>
+    </form>`)
+  async function recalc(){const s=$('er-s').value,r=$('er-r').value;if(!s||!r)return;const vs=await getDoc(doc(db,'vehiculos',vehiculoId));const dias=Math.ceil((new Date(r)-new Date(s))/86400000);if(dias>0){$('rec-val').textContent=fmtCur(dias*Number(vs.data().precioDia));$('rec-prev').style.display='flex'}}
+  setTimeout(()=>{$('er-s')?.addEventListener('change',recalc);$('er-r')?.addEventListener('change',recalc)},100)
+}
+window.guardarEdicionReserva=async function(e,id,vehiculoId){
+  e.preventDefault();const fd=new FormData(e.target),data=Object.fromEntries(fd)
+  const fs=new Date(data.fechaSalida),fr=new Date(data.fechaRetorno)
+  if(fr<=fs){alert('❌ La fecha de retorno debe ser posterior a la de salida.');return}
+  const btn=$('btn-er');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'
+  try{
+    const vs=await getDoc(doc(db,'vehiculos',vehiculoId)),dias=Math.ceil((fr-fs)/86400000),total=dias*Number(vs.data().precioDia)
+    await updateDoc(doc(db,'reservas',id),{fechaSalida:Timestamp.fromDate(fs),fechaRetorno:Timestamp.fromDate(fr),observaciones:data.observaciones||'',total})
+    const ps=await getDocs(query(col('pagos'),where('reservaId','==',id),where('estado','==','PENDIENTE')))
+    for(const p of ps.docs)await updateDoc(p.ref,{monto:total})
+    cerrarModal();renderReservas()
+  }catch(err){alert(err.message);btn.disabled=false;btn.innerHTML='Guardar'}
+}
+
+window.abrirModalNuevaReserva=async function(){
+  const[cSnap,vSnap]=await Promise.all([getDocs(query(col('clientes'),orderBy('createdAt','desc'))),getDocs(col('vehiculos'))])
+  const clientes=snap2arr(cSnap),vehiculos=snap2arr(vSnap).filter(v=>v.estado==='DISPONIBLE')
+  abrirModal('Nueva reserva',`
+    <form id="form-res" onsubmit="guardarReserva(event)">
+      <div class="form-group" style="margin-bottom:12px"><label class="label">Cliente *</label>
+        <select class="input" name="clienteId" required><option value="">Seleccionar...</option>${clientes.map(c=>`<option value="${c.id}">${c.nombreCompleto} — ${c.numeroDocumento||c.dui||''}</option>`).join('')}</select>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label class="label">Vehículo disponible *</label>
+        <select class="input" name="vehiculoId" id="sel-veh" required onchange="calcTotal()"><option value="">Seleccionar...</option>${vehiculos.map(v=>`<option value="${v.id}" data-precio="${v.precioDia}">${v.marca} ${v.modelo} (${v.placa}) — $${Number(v.precioDia).toFixed(2)}/día</option>`).join('')}</select>
+      </div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label class="label">Fecha de salida *</label><input class="input" id="ns" name="fechaSalida" type="date" required min="${hoyISO()}" onchange="calcTotal()"/><div class="field-error" id="err-ns"></div></div>
+        <div class="form-group"><label class="label">Fecha de retorno *</label><input class="input" id="nr" name="fechaRetorno" type="date" required min="${hoyISO()}" onchange="calcTotal()"/><div class="field-error" id="err-nr"></div></div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label class="label">Método de pago</label>
+        <select class="input" name="metodoPago"><option value="EFECTIVO">Efectivo</option><option value="TRANSFERENCIA">Transferencia</option><option value="TARJETA">Tarjeta</option></select>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label class="label">Observaciones</label><textarea class="input" name="observaciones" rows="2"></textarea></div>
+      <div id="tot-prev" style="display:none;margin-bottom:8px" class="info-box"><div><div class="text-sm" style="color:var(--azul-m)">Total estimado</div><div class="text-xs text-gray"><span id="tot-dias"></span> días</div></div><div id="tot-val" style="font-size:20px;font-weight:700;color:var(--azul)"></div></div>
+      <div id="err-solap" style="display:none" class="alert-banner">⚠️ <strong>Conflicto:</strong> ese vehículo ya tiene reserva activa en esas fechas.</div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button><button type="submit" class="btn btn-primary" id="btn-res">Crear reserva</button></div>
+    </form>`)
+}
+window.calcTotal=async function(){
+  const sel=$('sel-veh'),opt=sel?.options[sel.selectedIndex],precio=Number(opt?.dataset?.precio||0)
+  const sv=$('ns')?.value,rv=$('nr')?.value,prev=$('tot-prev'),es=$('err-solap')
+  if(prev)prev.style.display='none';if(es)es.style.display='none'
+  const hoyStr=hoyISO()
+  if(sv&&sv<hoyStr){const e=$('err-ns');if(e)e.textContent='❌ No se permiten fechas pasadas';$('ns')?.classList.add('error');return}else{const e=$('err-ns');if(e)e.textContent='';$('ns')?.classList.remove('error')}
+  if(sv&&rv&&rv<=sv){const e=$('err-nr');if(e)e.textContent='❌ Retorno debe ser posterior a salida';$('nr')?.classList.add('error');return}else{const e=$('err-nr');if(e)e.textContent='';$('nr')?.classList.remove('error')}
+  if(!precio||!sv||!rv)return
+  const dias=Math.ceil((new Date(rv)-new Date(sv))/86400000);if(dias<=0)return
+  if(sel.value){const rs=await getDocs(query(col('reservas'),where('vehiculoId','==',sel.value),where('estado','==','ACTIVA')));const fs=new Date(sv),fr=new Date(rv);if(snap2arr(rs).some(r=>{const s=toDate(r.fechaSalida),e=toDate(r.fechaRetorno);return s&&e&&fs<e&&fr>s})){if(es)es.style.display='flex';return}}
+  $('tot-dias').textContent=dias;$('tot-val').textContent=fmtCur(dias*precio);if(prev)prev.style.display='flex'
+}
+window.guardarReserva=async function(e){
+  e.preventDefault();const btn=$('btn-res');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'
+  const fd=new FormData(e.target),data=Object.fromEntries(fd)
+  if(data.fechaSalida<hoyISO()){alert('❌ No se permiten fechas pasadas');btn.disabled=false;btn.innerHTML='Crear reserva';return}
+  if(data.fechaRetorno<=data.fechaSalida){alert('❌ La fecha de retorno debe ser posterior a la de salida');btn.disabled=false;btn.innerHTML='Crear reserva';return}
+  try{
+    const vs=await getDoc(doc(db,'vehiculos',data.vehiculoId)),precio=Number(vs.data().precioDia)
+    const fs=new Date(data.fechaSalida),fr=new Date(data.fechaRetorno),dias=Math.ceil((fr-fs)/86400000),total=dias*precio
+    const rs=await getDocs(query(col('reservas'),where('vehiculoId','==',data.vehiculoId),where('estado','==','ACTIVA')))
+    if(snap2arr(rs).some(r=>{const s=toDate(r.fechaSalida),e=toDate(r.fechaRetorno);return s&&e&&fs<e&&fr>s})){alert('❌ Ese vehículo ya tiene reserva activa en esas fechas.');btn.disabled=false;btn.innerHTML='Crear reserva';return}
+    const ref=await addDoc(col('reservas'),{clienteId:data.clienteId,vehiculoId:data.vehiculoId,usuarioId:usuario.uid,fechaSalida:Timestamp.fromDate(fs),fechaRetorno:Timestamp.fromDate(fr),total,estado:'ACTIVA',observaciones:data.observaciones||'',createdAt:serverTimestamp()})
+    await addDoc(col('pagos'),{reservaId:ref.id,monto:total,metodo:data.metodoPago,estado:'PENDIENTE',fechaPago:null,comprobante:'',createdAt:serverTimestamp()})
+    await updateDoc(doc(db,'vehiculos',data.vehiculoId),{estado:'ALQUILADO'})
+    cerrarModal();renderReservas()
+  }catch(err){alert(err.message);btn.disabled=false;btn.innerHTML='Crear reserva'}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CLIENTES — formulario expandido con tipo de documento, nacionalidad, etc.
+// ═══════════════════════════════════════════════════════════════════════════════
+async function renderClientes(search=''){
+  const[cSnap,rSnap,pSnap]=await Promise.all([getDocs(query(col('clientes'),orderBy('createdAt','desc'))),getDocs(col('reservas')),getDocs(col('pagos'))])
+  let clientes=snap2arr(cSnap)
+  if(search){const s=search.toLowerCase();clientes=clientes.filter(c=>c.nombreCompleto?.toLowerCase().includes(s)||c.numeroDocumento?.includes(s)||c.telefono?.includes(s))}
+  const reservas=snap2arr(rSnap),pagos=snap2arr(pSnap)
+  const stats={}
+  clientes.forEach(c=>{const rc=reservas.filter(r=>r.clienteId===c.id),pc=pagos.filter(p=>rc.some(r=>r.id===p.reservaId));stats[c.id]={total:rc.length,venc:pc.filter(p=>p.estado==='VENCIDO').length,cobrado:pc.filter(p=>p.estado==='PAGADO').reduce((s,p)=>s+Number(p.monto),0)}})
+  $('content').innerHTML=`<div class="page">
+    <div class="page-header"><div class="page-title">Clientes</div><button class="btn btn-primary" onclick="abrirModalCliente(null)">+ Nuevo cliente</button></div>
+    <form class="filtros" onsubmit="event.preventDefault();renderClientes($('cs').value)"><input class="input" id="cs" placeholder="Buscar nombre, documento o teléfono..." value="${search}" style="flex:1"/><button type="submit" class="btn btn-secondary">Buscar</button>${search?`<button type="button" class="btn btn-secondary" onclick="renderClientes('')">Limpiar</button>`:''}</form>
+    <div class="card card-tight"><table><thead><tr><th>Cliente</th><th>Documento</th><th>Licencia</th><th>Teléfono</th><th>Reservas</th><th>Inteligencia</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${clientes.length===0?`<tr><td colspan="8" class="empty">No se encontraron clientes</td></tr>`:clientes.map(c=>{
+        const s=stats[c.id]||{}
+        const tag=s.venc>=2?`<div class="intel-tag">🔴 ${s.venc} pagos atrasados</div>`:s.venc===1?`<div class="intel-tag warn">⚠️ 1 pago atrasado</div>`:s.total>=3&&s.venc===0?`<div class="intel-tag good">✅ Cliente frecuente</div>`:s.total===0?`<div class="intel-tag warn" style="background:var(--gris-l);color:var(--gris)">Sin reservas</div>`:''
+        return`<tr>
+          <td><div class="flex items-center gap-2"><div style="width:28px;height:28px;border-radius:50%;background:var(--azul-xl);color:var(--azul-m);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">${c.nombreCompleto?.charAt(0)||'?'}</div><div><div class="font-medium">${c.nombreCompleto}</div><div class="text-xs text-gray">${c.nacionalidad||''}</div></div></div></td>
+          <td><div class="text-xs" style="color:var(--gris)">${c.tipoDocumento||'DUI'}</div><div>${c.numeroDocumento||'—'}</div></td>
+          <td>${c.numeroLicencia||c.licencia||'—'}</td>
+          <td>${c.telefono||'—'}</td>
+          <td><div class="font-medium">${s.total||0}</div><div class="text-xs text-gray">${fmtCur(s.cobrado||0)}</div></td>
+          <td>${tag}</td>
+          <td>${c.tieneIncidente?'<span class="badge badge-red">Con incidente</span>':'<span class="badge badge-green">Activo</span>'}</td>
+          <td><div class="flex gap-2"><button class="action-link" onclick="verHistorialCliente('${c.id}','${c.nombreCompleto}')">Historial</button><button class="action-link" onclick='abrirModalCliente(${JSON.stringify(c).replace(/'/g,"&#39;")})'>Editar</button></div></td>
+        </tr>`
+      }).join('')}
+    </tbody></table></div>
+  </div>`
+}
+
+window.verHistorialCliente=async function(clienteId,nombre){
+  const[rSnap,pSnap,vSnap]=await Promise.all([getDocs(query(col('reservas'),where('clienteId','==',clienteId),orderBy('createdAt','desc'))),getDocs(col('pagos')),getDocs(col('vehiculos'))])
+  const reservas=snap2arr(rSnap),pagos=snap2arr(pSnap),vMap=Object.fromEntries(vSnap.docs.map(d=>[d.id,d.data()]))
+  const cobrado=pagos.filter(p=>reservas.some(r=>r.id===p.reservaId)&&p.estado==='PAGADO').reduce((s,p)=>s+Number(p.monto),0)
+  const pend=pagos.filter(p=>reservas.some(r=>r.id===p.reservaId)&&p.estado==='PENDIENTE').reduce((s,p)=>s+Number(p.monto),0)
+  const venc=pagos.filter(p=>reservas.some(r=>r.id===p.reservaId)&&p.estado==='VENCIDO').reduce((s,p)=>s+Number(p.monto),0)
+  abrirModal(`Historial — ${nombre}`,`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <div class="info-box green" style="flex-direction:column;align-items:flex-start;padding:10px 14px"><div class="text-xs" style="color:var(--verde);font-weight:600">Cobrado</div><div style="font-weight:700;color:var(--verde)">${fmtCur(cobrado)}</div></div>
+      <div class="info-box yellow" style="flex-direction:column;align-items:flex-start;padding:10px 14px"><div class="text-xs" style="color:var(--amarillo);font-weight:600">Pendiente</div><div style="font-weight:700;color:var(--amarillo)">${fmtCur(pend)}</div></div>
+      <div class="info-box red" style="flex-direction:column;align-items:flex-start;padding:10px 14px"><div class="text-xs" style="color:var(--rojo);font-weight:600">Vencido</div><div style="font-weight:700;color:var(--rojo)">${fmtCur(venc)}</div></div>
+    </div>
+    <div class="text-xs text-gray" style="margin-bottom:8px;font-weight:600">RESERVAS (${reservas.length})</div>
+    ${reservas.length===0?'<div class="text-sm text-gray">Sin reservas</div>':reservas.map(r=>{const est=ER[r.estado]||{label:r.estado,cls:'badge-gray'},veh=vMap[r.vehiculoId]||{};return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gris-l)"><div><div class="text-sm font-medium">${veh.marca||''} ${veh.modelo||''} (${veh.placa||'—'})</div><div class="text-xs text-gray">${fmtDate(toDate(r.fechaSalida))} → ${fmtDate(toDate(r.fechaRetorno))}</div></div><div class="flex items-center gap-2"><div class="font-medium text-sm">${fmtCur(r.total)}</div><span class="badge ${est.cls}">${est.label}</span></div></div>`}).join('')}
+  `,true)
+}
+
+window.abrirModalCliente=function(c){
+  const isNew=!c?.id
+  abrirModal(isNew?'Nuevo cliente':'Editar cliente',`
+    <form id="form-cli" onsubmit="guardarCliente(event,${c?`'${c.id}'`:'null'})">
+
+      <div class="section-title">Datos Personales</div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="label">Nombre Completo *</label>
+        <input class="input" name="nombreCompleto" value="${c?.nombreCompleto||''}" required placeholder="Nombre completo del cliente"/>
+      </div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group">
+          <label class="label">Tipo de Documento *</label>
+          <select class="input" name="tipoDocumento" id="tipo-doc" onchange="toggleTipoDoc()" required>
+            <option value="DUI" ${(!c?.tipoDocumento||c?.tipoDocumento==='DUI')?'selected':''}>DUI</option>
+            <option value="PASAPORTE" ${c?.tipoDocumento==='PASAPORTE'?'selected':''}>Pasaporte</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="label" id="lbl-doc">Número de DUI *</label>
+          <input class="input" name="numeroDocumento" id="inp-doc" value="${c?.numeroDocumento||c?.dui||''}" required placeholder="${c?.tipoDocumento==='PASAPORTE'?'Número de pasaporte':'00000000-0'}"/>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group">
+          <label class="label">Nacionalidad *</label>
+          <input class="input" name="nacionalidad" value="${c?.nacionalidad||'Salvadoreña'}" required/>
+        </div>
+        <div class="form-group">
+          <label class="label">Número de Licencia *</label>
+          <input class="input" name="numeroLicencia" value="${c?.numeroLicencia||c?.licencia||''}" required placeholder="Número de licencia de conducir"/>
+        </div>
+      </div>
+
+      <div class="section-title">Contacto</div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group">
+          <label class="label">Teléfono *</label>
+          <input class="input" name="telefono" value="${c?.telefono||''}" required placeholder="7000-0000"/>
+        </div>
+        <div class="form-group">
+          <label class="label">Correo Electrónico *</label>
+          <input class="input" name="correo" type="email" value="${c?.correo||c?.email||''}" required placeholder="correo@ejemplo.com"/>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="label">Dirección *</label>
+        <input class="input" name="direccion" value="${c?.direccion||''}" required placeholder="Dirección completa del cliente"/>
+      </div>
+
+      ${!isNew?`
+      <div class="section-title">Estado</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <input type="checkbox" id="chk-inc" name="tieneIncidente" ${c?.tieneIncidente?'checked':''}/>
+        <label for="chk-inc" class="text-sm">Tiene incidente registrado</label>
+      </div>`:''}
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-cli">Guardar cliente</button>
+      </div>
+    </form>`,true)
+}
+
+window.toggleTipoDoc=function(){
+  const tipo=$('tipo-doc')?.value,lbl=$('lbl-doc'),inp=$('inp-doc')
+  if(tipo==='PASAPORTE'){if(lbl)lbl.textContent='Número de Pasaporte *';if(inp)inp.placeholder='Número de pasaporte'}
+  else{if(lbl)lbl.textContent='Número de DUI *';if(inp)inp.placeholder='00000000-0'}
+}
+window.guardarCliente=async function(e,id){
+  e.preventDefault();const btn=$('btn-cli');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'
+  const fd=new FormData(e.target),data=Object.fromEntries(fd);data.tieneIncidente=!!data.tieneIncidente
+  // Mantener compatibilidad con campos legacy
+  data.dui=data.numeroDocumento;data.licencia=data.numeroLicencia;data.email=data.correo
+  try{if(!id){data.createdAt=serverTimestamp();await addDoc(col('clientes'),data)}else await updateDoc(doc(db,'clientes',id),data);cerrarModal();renderClientes()}
+  catch(err){alert(err.message);btn.disabled=false;btn.innerHTML='Guardar cliente'}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGOS
+// ═══════════════════════════════════════════════════════════════════════════════
+async function renderPagos(fe='',tab='pagos'){
+  const[pSnap,rSnap,cSnap,vSnap]=await Promise.all([getDocs(query(col('pagos'),orderBy('createdAt','desc'))),getDocs(col('reservas')),getDocs(col('clientes')),getDocs(col('vehiculos'))])
+  let pagos=snap2arr(pSnap);if(fe)pagos=pagos.filter(p=>p.estado===fe)
+  const rMap=Object.fromEntries(rSnap.docs.map(d=>[d.id,d.data()]))
+  const cMap=Object.fromEntries(cSnap.docs.map(d=>[d.id,d.data()]))
+  const vMap=Object.fromEntries(vSnap.docs.map(d=>[d.id,d.data()]))
+  const cobrado=pagos.filter(p=>p.estado==='PAGADO').reduce((s,p)=>s+Number(p.monto),0)
+  const pendiente=pagos.filter(p=>p.estado==='PENDIENTE').reduce((s,p)=>s+Number(p.monto),0)
+  const vencido=pagos.filter(p=>p.estado==='VENCIDO').reduce((s,p)=>s+Number(p.monto),0)
+  const dMap={}
+  snap2arr(pSnap).filter(p=>['PENDIENTE','VENCIDO'].includes(p.estado)).forEach(p=>{const res=rMap[p.reservaId]||{},cid=res.clienteId;if(!cid)return;if(!dMap[cid])dMap[cid]={nombre:cMap[cid]?.nombreCompleto||'—',tel:cMap[cid]?.telefono||'',pend:0,venc:0};if(p.estado==='PENDIENTE')dMap[cid].pend+=Number(p.monto);else dMap[cid].venc+=Number(p.monto)})
+  const deudas=Object.entries(dMap).map(([id,d])=>({id,...d,total:d.pend+d.venc})).sort((a,b)=>b.venc-a.venc)
+  $('content').innerHTML=`<div class="page">
+    <div class="page-header"><div class="page-title">Control de pagos</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+      <div class="metric" style="background:#F0FDF4;border-color:#BBF7D0"><div class="metric-label" style="color:var(--verde)">💰 Total cobrado</div><div class="metric-value" style="color:var(--verde);font-size:20px">${fmtCur(cobrado)}</div></div>
+      <div class="metric" style="background:var(--amarillo-l);border-color:#FDE68A"><div class="metric-label" style="color:var(--amarillo)">⚠️ Pendiente</div><div class="metric-value" style="color:var(--amarillo);font-size:20px">${fmtCur(pendiente)}</div></div>
+      <div class="metric" style="background:var(--rojo-l);border-color:#FECACA"><div class="metric-label" style="color:var(--rojo)">🔴 En mora</div><div class="metric-value" style="color:var(--rojo);font-size:20px">${fmtCur(vencido)}</div></div>
+    </div>
+    <div class="tabs"><button class="tab ${tab==='pagos'?'active':''}" onclick="renderPagos('${fe}','pagos')">Pagos</button><button class="tab ${tab==='deuda'?'active':''}" onclick="renderPagos('${fe}','deuda')">Deuda por cliente</button></div>
+    ${tab==='deuda'?`<div class="card card-tight"><table><thead><tr><th>Cliente</th><th>Teléfono</th><th>Pendiente</th><th>En mora</th><th>Total</th><th></th></tr></thead><tbody>
+      ${deudas.length===0?`<tr><td colspan="6" class="empty">No hay deudas ✓</td></tr>`:deudas.map(d=>{const tel=d.tel.replace(/\D/g,''),msg=encodeURIComponent(`Hola ${d.nombre}, tiene una deuda de ${fmtCur(d.total)} con Transportes Melgar. Favor comunicarse.`);return`<tr><td class="font-medium">${d.nombre}</td><td class="text-gray">${d.tel||'—'}</td><td style="color:var(--amarillo);font-weight:500">${d.pend>0?fmtCur(d.pend):'—'}</td><td style="color:var(--rojo);font-weight:500">${d.venc>0?fmtCur(d.venc):'—'}</td><td class="font-bold">${fmtCur(d.total)}</td><td>${tel?`<a href="https://wa.me/503${tel}?text=${msg}" target="_blank" class="btn btn-wa btn-sm">📲 Cobrar</a>`:''}</td></tr>`}).join('')}
+    </tbody></table></div>`:
+    `<div class="filtros"><select class="input" style="width:180px" onchange="renderPagos(this.value,'pagos')"><option value="">Todos</option><option value="PENDIENTE" ${fe==='PENDIENTE'?'selected':''}>Pendientes</option><option value="PAGADO" ${fe==='PAGADO'?'selected':''}>Pagados</option><option value="VENCIDO" ${fe==='VENCIDO'?'selected':''}>Vencidos</option></select></div>
+    <div class="card card-tight"><table><thead><tr><th>Reserva</th><th>Cliente</th><th>Vehículo</th><th>Monto</th><th>Método</th><th>Fecha pago</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${pagos.length===0?`<tr><td colspan="8" class="empty">No hay pagos</td></tr>`:pagos.map(p=>{const res=rMap[p.reservaId]||{},cli=cMap[res.clienteId]||{},veh=vMap[res.vehiculoId]||{},est=EP[p.estado]||{label:p.estado,cls:'badge-gray'};return`<tr><td class="text-gray" style="font-family:'DM Mono',monospace;font-size:11px">${p.reservaId?.slice(0,6)||'—'}</td><td class="font-medium">${cli.nombreCompleto||'—'}</td><td class="text-gray">${veh.marca||''} ${veh.modelo||''}</td><td class="font-medium">${fmtCur(p.monto)}</td><td class="text-gray">${MP[p.metodo]||'—'}</td><td class="text-gray">${fmtDate(toDate(p.fechaPago))}</td><td><span class="badge ${est.cls}">${est.label}</span></td><td>${p.estado==='PENDIENTE'||p.estado==='VENCIDO'?`<div class="flex gap-2"><button class="action-link" onclick="abrirRegistroPago('${p.id}','${p.metodo}',${p.monto})">Cobrar</button><button class="action-link" style="color:var(--amarillo)" onclick="abrirAbono('${p.id}',${p.monto})">Abonar</button></div>`:''}</td></tr>`}).join('')}
+    </tbody></table></div>`}
+  </div>`
+}
+window.abrirRegistroPago=function(id,met,monto){abrirModal('Registrar pago',`
+  <form onsubmit="confirmarPago(event,'${id}')">
+    <div class="info-box green" style="margin-bottom:16px"><div class="text-sm" style="color:var(--verde)">Monto a cobrar</div><div style="font-size:20px;font-weight:700;color:var(--verde)">${fmtCur(monto)}</div></div>
+    <div class="form-group" style="margin-bottom:12px"><label class="label">Método</label><select class="input" id="pm"><option value="EFECTIVO" ${met==='EFECTIVO'?'selected':''}>Efectivo</option><option value="TRANSFERENCIA" ${met==='TRANSFERENCIA'?'selected':''}>Transferencia</option><option value="TARJETA" ${met==='TARJETA'?'selected':''}>Tarjeta</option></select></div>
+    <div class="form-group" style="margin-bottom:12px"><label class="label">Comprobante (opcional)</label><input class="input" id="pc"/></div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button><button type="submit" class="btn btn-green" id="btn-pago">✓ Confirmar pago</button></div>
+  </form>`)}
+window.confirmarPago=async function(e,id){
+  e.preventDefault();const btn=$('btn-pago');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'
+  try{await updateDoc(doc(db,'pagos',id),{metodo:$('pm').value,comprobante:$('pc').value||'',estado:'PAGADO',fechaPago:serverTimestamp()});cerrarModal();renderPagos()}
+  catch(err){alert(err.message);btn.disabled=false;btn.innerHTML='✓ Confirmar pago'}
+}
+window.abrirAbono=function(id,montoTotal){abrirModal('Registrar abono parcial',`
+  <form onsubmit="confirmarAbono(event,'${id}',${montoTotal})">
+    <div class="info-box yellow" style="margin-bottom:16px"><div class="text-sm" style="color:var(--amarillo)">Deuda total</div><div style="font-size:20px;font-weight:700;color:var(--amarillo)">${fmtCur(montoTotal)}</div></div>
+    <div class="form-group" style="margin-bottom:12px"><label class="label">Monto del abono ($)</label><input class="input" id="am" type="number" step="0.01" min="0.01" max="${(montoTotal-0.01).toFixed(2)}" required oninput="calcAbono(${montoTotal})"/></div>
+    <div id="ab-prev" style="display:none;margin-bottom:12px">
+      <div class="abono-row"><span class="text-gray">Abono:</span><span class="font-medium text-green" id="ab-val">—</span></div>
+      <div class="abono-row"><span class="text-gray">Saldo restante:</span><span class="font-medium text-red" id="ab-saldo">—</span></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px"><label class="label">Método</label><select class="input" id="abmet"><option value="EFECTIVO">Efectivo</option><option value="TRANSFERENCIA">Transferencia</option><option value="TARJETA">Tarjeta</option></select></div>
+    <div class="form-group" style="margin-bottom:12px"><label class="label">Comprobante (opcional)</label><input class="input" id="abcomp"/></div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button><button type="submit" class="btn btn-primary" id="btn-ab">Registrar abono</button></div>
+  </form>`)}
+window.calcAbono=function(total){const a=Number($('am').value)||0,s=total-a;if(a>0&&s>=0){$('ab-val').textContent=fmtCur(a);$('ab-saldo').textContent=fmtCur(s);$('ab-prev').style.display='block'}}
+window.confirmarAbono=async function(e,id,total){
+  e.preventDefault();const abono=Number($('am').value);if(abono<=0||abono>=total){alert('El abono debe ser menor al total');return}
+  const btn=$('btn-ab');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'
+  try{
+    await updateDoc(doc(db,'pagos',id),{monto:abono,metodo:$('abmet').value,comprobante:$('abcomp').value||'',estado:'PAGADO',fechaPago:serverTimestamp()})
+    const ps=await getDoc(doc(db,'pagos',id))
+    await addDoc(col('pagos'),{reservaId:ps.data().reservaId,monto:total-abono,metodo:ps.data().metodo,estado:'PENDIENTE',fechaPago:null,comprobante:'',esAbono:true,createdAt:serverTimestamp()})
+    cerrarModal();renderPagos()
+  }catch(err){alert(err.message);btn.disabled=false;btn.innerHTML='Registrar abono'}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// REPORTES
+// ═══════════════════════════════════════════════════════════════════════════════
+async function renderReportes(){
+  const[vSnap,pSnap,rSnap]=await Promise.all([getDocs(col('vehiculos')),getDocs(col('pagos')),getDocs(col('reservas'))])
+  const vehiculos=snap2arr(vSnap),pagados=snap2arr(pSnap).filter(p=>p.estado==='PAGADO'),reservas=snap2arr(rSnap)
+  const flota={total:vehiculos.length,disponibles:vehiculos.filter(v=>v.estado==='DISPONIBLE').length,alquilados:vehiculos.filter(v=>v.estado==='ALQUILADO').length,mant:vehiculos.filter(v=>v.estado==='MANTENIMIENTO').length}
+  const ahora=new Date()
+  const meses=Array.from({length:6},(_,i)=>{const d=new Date(ahora.getFullYear(),ahora.getMonth()-(5-i),1);return{key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:d.toLocaleDateString('es-SV',{month:'short',year:'2-digit'})}})
+  const ingMeses=meses.map(({key,label})=>({label,total:pagados.filter(p=>{const d=toDate(p.fechaPago);return d&&`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`===key}).reduce((s,p)=>s+Number(p.monto),0)}))
+  const maxT=Math.max(...ingMeses.map(m=>m.total),1)
+  const ingVeh={}
+  pagados.forEach(p=>{const r=reservas.find(r=>r.id===p.reservaId);if(!r)return;const v=vehiculos.find(v=>v.id===r.vehiculoId);if(!v)return;const lbl=`${v.marca} ${v.modelo} (${v.placa})`;if(!ingVeh[lbl])ingVeh[lbl]={total:0,res:0};ingVeh[lbl].total+=Number(p.monto);ingVeh[lbl].res++})
+  const topV=Object.entries(ingVeh).sort((a,b)=>b[1].total-a[1].total).slice(0,5)
+  $('content').innerHTML=`<div class="page">
+    <div class="page-header"><div class="page-title">Reportes</div></div>
+    <div class="grid-2">
+      <div class="card" style="grid-column:1/-1"><div class="font-medium mb-4">📈 Ingresos últimos 6 meses</div>
+        <div class="bar-chart">${ingMeses.map(m=>`<div class="bar-row"><div class="bar-mes">${m.label}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round((m.total/maxT)*100)}%">${m.total>0?`<span class="bar-amount">${fmtCur(m.total)}</span>`:''}</div></div>${m.total===0?'<span class="text-xs text-gray">$0</span>':''}</div>`).join('')}</div>
+      </div>
+      <div class="card"><div class="font-medium mb-4">🚗 Estado de flota</div>
+        ${flota.total>0?`<div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin-bottom:16px"><div style="width:${Math.round(flota.disponibles/flota.total*100)}%;background:var(--verde)"></div><div style="width:${Math.round(flota.alquilados/flota.total*100)}%;background:var(--azul-m)"></div><div style="width:${Math.round(flota.mant/flota.total*100)}%;background:var(--amarillo)"></div></div>
+        ${[['var(--verde)','Disponible',flota.disponibles],['var(--azul-m)','Alquilado',flota.alquilados],['var(--amarillo)','Mantenimiento',flota.mant]].map(([c,l,n])=>`<div class="flex justify-between items-center text-sm" style="padding:6px 0;border-bottom:1px solid var(--gris-l)"><div class="flex items-center gap-2"><div style="width:10px;height:10px;border-radius:3px;background:${c}"></div><span class="text-gray">${l}</span></div><span class="font-medium">${n} (${Math.round(n/flota.total*100)}%)</span></div>`).join('')}`:'<div class="text-sm text-gray">Sin vehículos</div>'}
+      </div>
+      <div class="card"><div class="font-medium mb-4">🏆 Vehículos que más generan</div>
+        ${topV.length===0?'<div class="text-sm text-gray">Sin datos aún</div>':topV.map(([nombre,d],i)=>{const maxV=topV[0][1].total;return`<div style="margin-bottom:10px"><div class="flex justify-between text-sm mb-1"><span>${['🥇','🥈','🥉','',''][i]||''} ${nombre}</span><span class="font-medium">${fmtCur(d.total)}</span></div><div style="background:var(--gris-l);border-radius:4px;height:8px;overflow:hidden"><div style="height:100%;border-radius:4px;background:var(--azul-m);width:${Math.round((d.total/maxV)*100)}%"></div></div><div class="text-xs text-gray mt-1">${d.res} reserva(s)</div></div>`}).join('')}
+      </div>
+    </div>
+  </div>`
+}
+</script>
+</body>
+</html>
